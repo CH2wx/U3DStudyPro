@@ -1,4 +1,4 @@
 sceneSetups:
-- path: Assets/Res/Tools/OpenScene/Base/PerformanceTesting/scene.unity
+- path: Assets/Res/Tools/OpenScene/ObjectManagement/PersistentObjects/scene.unity
   isLoaded: 1
   isActive: 1

@@ -1,7 +1,9 @@
 using System.Collections.Generic;
 using System.IO;
 using UnityEditor;
+using UnityEditor.SceneManagement;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 namespace Assets.Scripts.Tools.OpenScene
 {
@@ -34,6 +36,20 @@ namespace Assets.Scripts.Tools.OpenScene
         public static Object Load(string path)
         {
             return AssetDatabase.LoadAssetAtPath(path, typeof(GameObject));
+        }
+
+        public static void OpenScene(string scenePath)
+        {
+            EditorApplication.isPlaying = false;
+            if (EditorApplication.isPlaying)
+            {
+                SceneManager.LoadScene(scenePath);
+            }
+            else
+            {
+                EditorSceneManager.OpenScene(scenePath);
+                EditorApplication.isPlaying = true;
+            }
         }
     }
 }
