@@ -2,15 +2,18 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+[RequireComponent(typeof(Rigidbody))]
 public class Nucleon : MonoBehaviour {
+    public float attractionForce;
+    private Rigidbody body;
 
-	// Use this for initialization
-	void Start () {
-		
-	}
-	
-	// Update is called once per frame
-	void Update () {
-		
-	}
+    private void Awake()
+    {
+        body = GetComponent<Rigidbody>();
+    }
+
+    private void FixedUpdate()
+    {
+        body.AddForce(transform.localPosition * -attractionForce);
+    }
 }
