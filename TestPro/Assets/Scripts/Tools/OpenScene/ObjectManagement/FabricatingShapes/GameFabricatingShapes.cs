@@ -10,14 +10,20 @@ namespace Assets.Scripts.Tools.OpenScene.ObjectManagement.FabricatingShapes
         public float instantiateDistance = 15f;
 
         public bool isStartCreate = true;
+        public bool isStartDestroy = false;
         public KeyCode createKey = KeyCode.C;
+        public KeyCode destoryKey = KeyCode.X;
         public KeyCode newGameKey = KeyCode.V;
         public KeyCode saveKey = KeyCode.S;
         public KeyCode loadKey = KeyCode.R;
 
         [Range(0, 1)]
         public float createBetweenTime = 0.5f;
-        private float createLastTime;
+        private float createLastTime = 0;
+
+        [Range(0, 1)]
+        public float destroyBetweenTime = 0.5f;
+        private float destroyLastTime = 0;
 
         public bool isShowCreateObjects = true;
         private GameObject objectsParent;
@@ -32,6 +38,7 @@ namespace Assets.Scripts.Tools.OpenScene.ObjectManagement.FabricatingShapes
         private void Awake()
         {
             isStartCreate = true;
+            isStartDestroy = false;
             shapes = new List<Shape>();
 
             storage.ChangePath(saveFilePath);
@@ -69,6 +76,10 @@ namespace Assets.Scripts.Tools.OpenScene.ObjectManagement.FabricatingShapes
                 StartNewGame();
                 storage.Load(this);
             }
+            else if (Input.GetKeyDown(destoryKey))
+            {
+                DestroyShape();
+            }
 
             if (isStartCreate)
             {
@@ -77,6 +88,15 @@ namespace Assets.Scripts.Tools.OpenScene.ObjectManagement.FabricatingShapes
                 {
                     CreateShape(objectsParent.transform, prefab);
                     createLastTime = 0;
+                }
+            }
+            if (isStartDestroy)
+            {
+                destroyLastTime += Time.unscaledDeltaTime;
+                if (destroyLastTime > destroyBetweenTime)
+                {
+                    DestroyShape();
+                    destroyLastTime = 0;
                 }
             }
         }
@@ -106,6 +126,18 @@ namespace Assets.Scripts.Tools.OpenScene.ObjectManagement.FabricatingShapes
                                         alphaMin: 1f, alphaMax: 1f));
 
             shapes.Add(instance);
+        }
+
+        private void DestroyShape()
+        {
+            if (shapes.Count > 0)
+            {
+                int index = Random.Range(0, shapes.Count);
+                Destroy(shapes[index].gameObject);
+                int lastIndex = shapes.Count - 1;
+                shapes[index] = shapes[lastIndex];
+                shapes.RemoveAt(lastIndex);
+            }
         }
 
         public override void Save(GameDataWriter writer)
