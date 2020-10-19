@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace Assets.Scripts.Tools.OpenScene.ObjectManagement.PersistentObjects
 {
-    public class Game : PersistableObject
+    public class GamePersistentObjects : PersistableObject
     {
         public Transform prefab;
         public float instantiateDistance = 15f;
@@ -128,7 +128,8 @@ namespace Assets.Scripts.Tools.OpenScene.ObjectManagement.PersistentObjects
             int count = reader.ReadInt();
             for (int i = 0; i < count; i++)
             {
-                PersistableObject o = Instantiate(prefab).GetComponent<PersistableObject>();
+                PersistableObject o = Instantiate(prefab, objectsParent.transform).GetComponent<PersistableObject>();
+                o.name = i.ToString();
                 o.Load(reader);
                 objects.Add(o);
                 createObjects.Add(o.transform);

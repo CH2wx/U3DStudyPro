@@ -1,20 +1,17 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.IO;
 using UnityEngine;
 
 namespace Assets.Scripts.Tools.OpenScene.ObjectManagement.PersistentObjects
 {
     public class GameDataReader
     {
+        public int Version { get; }
         private BinaryReader reader;
 
-        public GameDataReader(BinaryReader reader)
+        public GameDataReader(BinaryReader reader, int version)
         {
             this.reader = reader;
+            this.Version = version;
         }
 
         public float ReadFloat()
@@ -44,6 +41,16 @@ namespace Assets.Scripts.Tools.OpenScene.ObjectManagement.PersistentObjects
             quaternion.z = reader.ReadSingle();
             quaternion.w= reader.ReadSingle();
             return quaternion;
+        }
+
+        public Color ReadColor()
+        {
+            Color color;
+            color.r = reader.ReadSingle();
+            color.b = reader.ReadSingle();
+            color.g = reader.ReadSingle();
+            color.a = reader.ReadSingle();
+            return color;
         }
     }
 }

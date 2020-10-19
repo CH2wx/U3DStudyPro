@@ -1,4 +1,4 @@
 sceneSetups:
-- path: Assets/Res/Tools/OpenScene/ObjectManagement/PersistentObjects/scene.unity
+- path: Assets/Res/Tools/OpenScene/ObjectManagement/FabricatingShapes/scene.unity
   isLoaded: 1
   isActive: 1

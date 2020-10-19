@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.IO;
 using UnityEngine;
 
 namespace Assets.Scripts.Tools.OpenScene.ObjectManagement.PersistentObjects
@@ -40,6 +35,14 @@ namespace Assets.Scripts.Tools.OpenScene.ObjectManagement.PersistentObjects
             writer.Write(value.y);
             writer.Write(value.z);
             writer.Write(value.w);
+        }
+
+        internal void Write(Color color)
+        {
+            writer.Write(color.r);
+            writer.Write(color.b);
+            writer.Write(color.g);
+            writer.Write(color.a);
         }
     }
 }
