@@ -11,9 +11,7 @@ namespace Assets.Scripts.Tools.OpenScene.Base.UI
 		[Range(10, 100)]
 		public int resolution = 10;
 		private int lastResolution;
-
-		private Vector3 initPos;
-
+        
 		private List<Transform> list = new List<Transform>();
 
         public MathManager.Type fType = MathManager.Type.Pow2;
@@ -35,7 +33,6 @@ namespace Assets.Scripts.Tools.OpenScene.Base.UI
 
 		private void DrawCube (int num)
 		{
-			initPos = Vector3.zero;
 			// 根据个数调整缩放比例
 			float step = 2.0f / resolution;
 			// 立方体缩放的值

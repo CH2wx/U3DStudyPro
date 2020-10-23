@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class GenCfgAudio
 {
-    static string dataOutputDir = "audioinfo/";
+    //static string dataOutputDir = "audioinfo/";
 
     [MenuItem("DevTool/GenCfg/Audio/Base")]
     public static void AudioBase ()

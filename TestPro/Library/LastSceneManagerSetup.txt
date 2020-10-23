@@ -1,4 +1,7 @@
 sceneSetups:
-- path: Assets/Res/Tools/OpenScene/ObjectManagement/FabricatingShapes/scene.unity
+- path: Assets/Res/Tools/OpenScene/ObjectManagement/FabricatingShapes/Level_1.unity
   isLoaded: 1
   isActive: 1
+- path: Assets/Res/Tools/OpenScene/ObjectManagement/FabricatingShapes/Main Scene.unity
+  isLoaded: 1
+  isActive: 0

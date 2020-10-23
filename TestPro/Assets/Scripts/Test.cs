@@ -16,7 +16,7 @@ public class Test : MonoBehaviour {
 	public float maxEuler = 150;
 	public float curMaxEuler;
 
-	private float rate = 1.5f;
+	//private float rate = 1.5f;
 	public float maxLevel = 5;
 	private float _curLevel = 0;
 	public float curLevel {

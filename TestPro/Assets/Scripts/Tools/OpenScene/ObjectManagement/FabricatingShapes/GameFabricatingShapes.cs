@@ -1,16 +1,25 @@
 ﻿using Assets.Scripts.Tools.OpenScene.ObjectManagement.PersistentObjects;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 
 namespace Assets.Scripts.Tools.OpenScene.ObjectManagement.FabricatingShapes
 {
     public class GameFabricatingShapes : PersistableObject
     {
         public Shape prefab;
+        private GameObject objectsParent;
         public float instantiateDistance = 15f;
 
-        public bool isStartCreate = true;
-        public bool isStartDestroy = false;
+        [Header("是否显示生成的对象")]
+        public bool isShowCreateObjects = true;
+
+        private bool isStartCreate;
+        private bool isStartDestroy;
+
+        [Header("可操作的按钮设置")]
         public KeyCode createKey = KeyCode.C;
         public KeyCode destoryKey = KeyCode.X;
         public KeyCode newGameKey = KeyCode.V;
@@ -20,34 +29,77 @@ namespace Assets.Scripts.Tools.OpenScene.ObjectManagement.FabricatingShapes
         [Range(0, 1)]
         public float createBetweenTime = 0.5f;
         private float createLastTime = 0;
+        public Text createText;
 
         [Range(0, 1)]
         public float destroyBetweenTime = 0.5f;
         private float destroyLastTime = 0;
-
-        public bool isShowCreateObjects = true;
-        private GameObject objectsParent;
+        public Text destoryText;
 
         private string saveFilePath = "\\FabricatingShapes\\SaveFile";
         public PersistentStorage storage;
-        public List<Shape> shapes;
+        private List<Shape> shapes;
         public ShapeFactory factory;
 
-        public const int saveVersionId = 1;
+        public int levelCount = 0;
+        private int loadedLevelBuildIndex = -1;
 
-        private void Awake()
-        {
-            isStartCreate = true;
-            isStartDestroy = false;
-            shapes = new List<Shape>();
+        private const int saveVersionId = 2;
 
-            storage.ChangePath(saveFilePath);
+        /*********************************************************** setter // getter *******************************************************/
+        public float CreationSpeed {
+            get
+            {
+                return float.Parse(createText.text);
+            }
+            set
+            {
+                isStartCreate = value > 0;
+                createText.text = value.ToString();
+            }
         }
 
+        public float DestructionSpeed
+        {
+            get
+            {
+                return float.Parse(destoryText.text);
+            }
+            set
+            {
+                isStartDestroy = value > 0;
+                destoryText.text = value.ToString();
+            }
+        }
+
+        /*********************************************************** Logic Function *******************************************************/
         // Use this for initialization
         void Start()
         {
-            objectsParent = new GameObject("CreateObjects");
+            isStartCreate = false;
+            isStartDestroy = false;
+            shapes = new List<Shape>();
+            CreationSpeed = CreationSpeed;
+            DestructionSpeed = DestructionSpeed;
+            objectsParent = factory.ShapesParent;
+
+            storage.ChangePath(saveFilePath);
+
+            if(Application.isEditor)
+            {
+                for (int i = 0; i < SceneManager.sceneCount; i++)
+                {
+                    Scene loadedScene = SceneManager.GetSceneAt(i);
+                    if (loadedScene.name.Contains("Level_"))
+                    {
+                        loadedLevelBuildIndex = int.Parse(loadedScene.name.Split('_')[1]);
+                        SceneManager.SetActiveScene(SceneManager.GetSceneAt(loadedLevelBuildIndex));
+                        return;
+                    }
+                }
+            }
+
+            StartCoroutine(LoadLevel(2));
         }
 
         // Update is called once per frame
@@ -57,11 +109,9 @@ namespace Assets.Scripts.Tools.OpenScene.ObjectManagement.FabricatingShapes
             {
                 objectsParent.SetActive(isShowCreateObjects);
             }
-
-            if (Input.GetKeyDown(createKey))
+            else if (Input.GetKeyDown(createKey))
             {
-                isStartCreate = !isStartCreate;
-                createLastTime = 0;
+                CreateShape(objectsParent.transform, prefab);
             }
             else if (Input.GetKeyDown(newGameKey))
             {
@@ -80,23 +130,34 @@ namespace Assets.Scripts.Tools.OpenScene.ObjectManagement.FabricatingShapes
             {
                 DestroyShape();
             }
+            else
+            {
+                for (int i = 1; i < 10; i++)
+                {
+                    if (Input.GetKeyDown(KeyCode.Alpha0 + i))
+                    {
+                        StartNewGame();
+                        StartCoroutine(LoadLevel(i));
+                    }
+                }
+            }
 
             if (isStartCreate)
             {
-                createLastTime += Time.unscaledDeltaTime;
-                if (createLastTime > createBetweenTime)
+                createLastTime += Time.unscaledDeltaTime * CreationSpeed;
+                while (createLastTime > createBetweenTime)
                 {
+                    createLastTime -= createBetweenTime;
                     CreateShape(objectsParent.transform, prefab);
-                    createLastTime = 0;
                 }
             }
             if (isStartDestroy)
             {
-                destroyLastTime += Time.unscaledDeltaTime;
-                if (destroyLastTime > destroyBetweenTime)
+                destroyLastTime += Time.unscaledDeltaTime * DestructionSpeed;
+                while (destroyLastTime > destroyBetweenTime)
                 {
+                    destroyLastTime -= destroyBetweenTime;
                     DestroyShape();
-                    destroyLastTime = 0;
                 }
             }
         }
@@ -105,7 +166,7 @@ namespace Assets.Scripts.Tools.OpenScene.ObjectManagement.FabricatingShapes
         {
             for (int i = 0; i < shapes.Count; i++)
             {
-                Destroy(shapes[i].gameObject);
+                factory.Reclaim(shapes[i]);
             }
             shapes.Clear();
         }
@@ -133,7 +194,7 @@ namespace Assets.Scripts.Tools.OpenScene.ObjectManagement.FabricatingShapes
             if (shapes.Count > 0)
             {
                 int index = Random.Range(0, shapes.Count);
-                Destroy(shapes[index].gameObject);
+                factory.Reclaim(shapes[index]);
                 int lastIndex = shapes.Count - 1;
                 shapes[index] = shapes[lastIndex];
                 shapes.RemoveAt(lastIndex);
@@ -143,6 +204,7 @@ namespace Assets.Scripts.Tools.OpenScene.ObjectManagement.FabricatingShapes
         public override void Save(GameDataWriter writer)
         {
             writer.Write(shapes.Count);
+            writer.Write(loadedLevelBuildIndex);
             for (int i = 0; i < shapes.Count; i++)
             {
                 shapes[i].Save(writer);
@@ -160,6 +222,7 @@ namespace Assets.Scripts.Tools.OpenScene.ObjectManagement.FabricatingShapes
             }
 
             int count = reader.ReadInt();
+            StartCoroutine(LoadLevel(versionId < 2 ? 1 : reader.ReadInt()));
             for (int i = 0; i < count; i++)
             {
                 int shapeId = reader.ReadInt();
@@ -170,6 +233,48 @@ namespace Assets.Scripts.Tools.OpenScene.ObjectManagement.FabricatingShapes
                 instance.Load(reader);
                 shapes.Add(instance);
             }
+        }
+
+        private IEnumerator LoadLevel()
+        {
+            enabled = false;
+            string sceneName = "Level_1";
+            Scene scene = SceneManager.GetSceneByName(sceneName);
+            if (Application.isEditor)
+            {
+                if (!scene.isLoaded)
+                {
+                    //SceneManager.LoadScene(sceneName, LoadSceneMode.Additive);
+                    //yield return null;
+                    yield return LoadAsyncLevel(sceneName);
+                    scene = SceneManager.GetSceneByName(sceneName);
+                }
+            }
+            SceneManager.SetActiveScene(scene);
+            enabled = true;
+        }
+
+        private IEnumerator LoadLevel(int levelBuildIndex)
+        {
+            enabled = false;
+            if (loadedLevelBuildIndex >= 0)
+            {
+                Debug.Log(loadedLevelBuildIndex);
+                yield return SceneManager.UnloadSceneAsync(loadedLevelBuildIndex);
+            }
+            yield return SceneManager.LoadSceneAsync(
+                levelBuildIndex, LoadSceneMode.Additive
+            );
+            SceneManager.SetActiveScene(
+                SceneManager.GetSceneByBuildIndex(levelBuildIndex)
+            );
+            loadedLevelBuildIndex = levelBuildIndex;
+            enabled = true;
+        }
+
+        private IEnumerator LoadAsyncLevel(string sceneName)
+        {
+            yield return SceneManager.LoadSceneAsync(sceneName, LoadSceneMode.Additive);
         }
     }
 }
