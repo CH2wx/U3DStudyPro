@@ -1,4 +1,5 @@
-﻿using Assets.Scripts.Tools.OpenScene.ObjectManagement.PersistentObjects;
+﻿using Assets.Scripts.Tools.OpenScene.ObjectManagement.FabricatingShapes.SpawnZones;
+using Assets.Scripts.Tools.OpenScene.ObjectManagement.PersistentObjects;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -9,42 +10,52 @@ namespace Assets.Scripts.Tools.OpenScene.ObjectManagement.FabricatingShapes
 {
     public class GameFabricatingShapes : PersistableObject
     {
-        public Shape prefab;
+        [SerializeField]
+        private Shape prefab;
         private GameObject objectsParent;
         public float instantiateDistance = 15f;
 
-        [Header("是否显示生成的对象")]
+        [SerializeField, Header("是否显示生成的对象")]
         public bool isShowCreateObjects = true;
 
         private bool isStartCreate;
         private bool isStartDestroy;
 
         [Header("可操作的按钮设置")]
-        public KeyCode createKey = KeyCode.C;
-        public KeyCode destoryKey = KeyCode.X;
-        public KeyCode newGameKey = KeyCode.V;
-        public KeyCode saveKey = KeyCode.S;
-        public KeyCode loadKey = KeyCode.R;
+        [SerializeField]
+        private KeyCode createKey = KeyCode.C;
+        [SerializeField]
+        private KeyCode destoryKey = KeyCode.X;
+        [SerializeField]
+        private KeyCode newGameKey = KeyCode.V;
+        [SerializeField]
+        private KeyCode saveKey = KeyCode.S;
+        [SerializeField]
+        private KeyCode loadKey = KeyCode.R;
 
-        [Range(0, 1)]
-        public float createBetweenTime = 0.5f;
+        [SerializeField, Range(0, 1)]
+        private float createBetweenTime = 0.5f;
         private float createLastTime = 0;
-        public Text createText;
+        [SerializeField]
+        private Text createText;
 
-        [Range(0, 1)]
-        public float destroyBetweenTime = 0.5f;
+        [SerializeField, Range(0, 1)]
+        private float destroyBetweenTime = 0.5f;
         private float destroyLastTime = 0;
-        public Text destoryText;
+        [SerializeField]
+        private Text destoryText;
 
         private string saveFilePath = "\\FabricatingShapes\\SaveFile";
         public PersistentStorage storage;
         private List<Shape> shapes;
         public ShapeFactory factory;
+        public SpawnZone SpawnZoneOfLevel { set; get; }
 
-        public int levelCount = 0;
         private int loadedLevelBuildIndex = -1;
 
-        private const int saveVersionId = 2;
+        private const int saveVersionId = 3;
+
+        public static GameFabricatingShapes Instance { get; private set; }
 
         /*********************************************************** setter // getter *******************************************************/
         public float CreationSpeed {
@@ -73,6 +84,12 @@ namespace Assets.Scripts.Tools.OpenScene.ObjectManagement.FabricatingShapes
         }
 
         /*********************************************************** Logic Function *******************************************************/
+
+        private void OnEnable()
+        {
+            Instance = this;
+        }
+
         // Use this for initialization
         void Start()
         {
@@ -93,13 +110,13 @@ namespace Assets.Scripts.Tools.OpenScene.ObjectManagement.FabricatingShapes
                     if (loadedScene.name.Contains("Level_"))
                     {
                         loadedLevelBuildIndex = int.Parse(loadedScene.name.Split('_')[1]);
-                        SceneManager.SetActiveScene(SceneManager.GetSceneAt(loadedLevelBuildIndex));
+                        SceneManager.SetActiveScene(loadedScene);
                         return;
                     }
                 }
             }
 
-            StartCoroutine(LoadLevel(2));
+            StartCoroutine(LoadLevel(3));
         }
 
         // Update is called once per frame
@@ -174,7 +191,8 @@ namespace Assets.Scripts.Tools.OpenScene.ObjectManagement.FabricatingShapes
         private void CreateShape(Transform parent, Shape prefab)
         {
             Shape instance = factory.GetRandom();
-            instance.transform.localPosition = Random.insideUnitSphere * instantiateDistance;
+            //instance.transform.localPosition = Random.insideUnitSphere * instantiateDistance;
+            instance.transform.localPosition = SpawnZoneOfLevel.SpawnPoint;
             instance.transform.localRotation = Random.rotation;
             instance.transform.localScale = Vector3.one * Random.Range(0.1f, 1.0f);
             instance.transform.SetParent(parent);
@@ -204,6 +222,9 @@ namespace Assets.Scripts.Tools.OpenScene.ObjectManagement.FabricatingShapes
         public override void Save(GameDataWriter writer)
         {
             writer.Write(shapes.Count);
+            // Random.Range是一个伪随机数，所以如果在保存之后出现的物体位置一样，保存Random的伪随机序列即可
+            writer.Write(Random.state);
+            // 储存最后一次加载的Level关卡
             writer.Write(loadedLevelBuildIndex);
             for (int i = 0; i < shapes.Count; i++)
             {
@@ -222,6 +243,11 @@ namespace Assets.Scripts.Tools.OpenScene.ObjectManagement.FabricatingShapes
             }
 
             int count = reader.ReadInt();
+            if (versionId >= 3)
+            {
+                Random.state = reader.ReadRandomState();
+            }
+
             StartCoroutine(LoadLevel(versionId < 2 ? 1 : reader.ReadInt()));
             for (int i = 0; i < count; i++)
             {
@@ -259,7 +285,6 @@ namespace Assets.Scripts.Tools.OpenScene.ObjectManagement.FabricatingShapes
             enabled = false;
             if (loadedLevelBuildIndex >= 0)
             {
-                Debug.Log(loadedLevelBuildIndex);
                 yield return SceneManager.UnloadSceneAsync(loadedLevelBuildIndex);
             }
             yield return SceneManager.LoadSceneAsync(

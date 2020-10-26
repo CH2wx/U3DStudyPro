@@ -44,5 +44,11 @@ namespace Assets.Scripts.Tools.OpenScene.ObjectManagement.PersistentObjects
             writer.Write(color.g);
             writer.Write(color.a);
         }
+
+        public void Write(Random.State value)
+        {
+            Debug.Log(JsonUtility.ToJson(value));
+            writer.Write(JsonUtility.ToJson(value));
+        }
     }
 }

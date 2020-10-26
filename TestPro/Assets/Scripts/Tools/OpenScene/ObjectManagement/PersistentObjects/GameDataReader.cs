@@ -52,5 +52,10 @@ namespace Assets.Scripts.Tools.OpenScene.ObjectManagement.PersistentObjects
             color.a = reader.ReadSingle();
             return color;
         }
+
+        public Random.State ReadRandomState()
+        {
+            return JsonUtility.FromJson<Random.State>(reader.ReadString());
+        }
     }
 }

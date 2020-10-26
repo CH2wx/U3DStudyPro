@@ -12,13 +12,16 @@
     <ProjectTypeGuids>{E097FAD1-6243-4DAD-9C02-E9B9EFC3FFC1};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
     <TargetFrameworkIdentifier>.NETFramework</TargetFrameworkIdentifier>
     <TargetFrameworkVersion>v4.6</TargetFrameworkVersion>
-    <TargetFrameworkProfile></TargetFrameworkProfile>
-    <CompilerResponseFile></CompilerResponseFile>
+    <TargetFrameworkProfile>
+    </TargetFrameworkProfile>
+    <CompilerResponseFile>
+    </CompilerResponseFile>
     <UnityProjectGenerator>VSTU</UnityProjectGenerator>
     <UnityProjectType>Game:1</UnityProjectType>
     <UnityBuildTarget>StandaloneWindows64:19</UnityBuildTarget>
     <UnityVersion>2017.4.39f1</UnityVersion>
-    <RootNamespace></RootNamespace>
+    <RootNamespace>
+    </RootNamespace>
     <LangVersion>6</LangVersion>
   </PropertyGroup>
   <PropertyGroup>
@@ -272,11 +275,15 @@
     <Compile Include="Assets\Scripts\Tools\OpenScene\Base\UI\Cube.cs" />
     <Compile Include="Assets\Scripts\Tools\OpenScene\Base\UI\Graph.cs" />
     <Compile Include="Assets\Scripts\Tools\OpenScene\Base\UI\UI.cs" />
-    <Compile Include="Assets\Scripts\Tools\OpenScene\ObjectManagement\FabricatingShapes\Game.cs" />
     <Compile Include="Assets\Scripts\Tools\OpenScene\ObjectManagement\FabricatingShapes\GameFabricatingShapes.cs" />
     <Compile Include="Assets\Scripts\Tools\OpenScene\ObjectManagement\FabricatingShapes\OpenScene.cs" />
     <Compile Include="Assets\Scripts\Tools\OpenScene\ObjectManagement\FabricatingShapes\Shape.cs" />
     <Compile Include="Assets\Scripts\Tools\OpenScene\ObjectManagement\FabricatingShapes\ShapeFactory.cs" />
+    <Compile Include="Assets\Scripts\Tools\OpenScene\ObjectManagement\FabricatingShapes\SpawnZones\CompositeSpawnZone.cs" />
+    <Compile Include="Assets\Scripts\Tools\OpenScene\ObjectManagement\FabricatingShapes\SpawnZones\CubeSpawnZone.cs" />
+    <Compile Include="Assets\Scripts\Tools\OpenScene\ObjectManagement\FabricatingShapes\SpawnZones\GameLevel.cs" />
+    <Compile Include="Assets\Scripts\Tools\OpenScene\ObjectManagement\FabricatingShapes\SpawnZones\SpawnZone.cs" />
+    <Compile Include="Assets\Scripts\Tools\OpenScene\ObjectManagement\FabricatingShapes\SpawnZones\SphereSpawnZone.cs" />
     <Compile Include="Assets\Scripts\Tools\OpenScene\ObjectManagement\PersistentObjects\GameDataReader.cs" />
     <Compile Include="Assets\Scripts\Tools\OpenScene\ObjectManagement\PersistentObjects\GameDataWriter.cs" />
     <Compile Include="Assets\Scripts\Tools\OpenScene\ObjectManagement\PersistentObjects\GamePersistentObjects.cs" />
