@@ -49,7 +49,11 @@ namespace Assets.Scripts.Tools.OpenScene.ObjectManagement.FabricatingShapes
         public PersistentStorage storage;
         private List<Shape> shapes;
         public ShapeFactory factory;
-        public SpawnZone SpawnZoneOfLevel { set; get; }
+        //public SpawnZone SpawnZoneOfLevel { set; get; }
+
+        [SerializeField]
+        private bool reseedOnLoad;          //是否在加载是重新刷新随机种子
+        private Random.State mainRandomState;
 
         private int loadedLevelBuildIndex = -1;
 
@@ -85,6 +89,7 @@ namespace Assets.Scripts.Tools.OpenScene.ObjectManagement.FabricatingShapes
 
         /*********************************************************** Logic Function *******************************************************/
 
+        // OnEnable在Start之前被调用，用于初始化静态变量，方便其他方法在Start中进行调用
         private void OnEnable()
         {
             Instance = this;
@@ -99,9 +104,11 @@ namespace Assets.Scripts.Tools.OpenScene.ObjectManagement.FabricatingShapes
             CreationSpeed = CreationSpeed;
             DestructionSpeed = DestructionSpeed;
             objectsParent = factory.ShapesParent;
+            mainRandomState = Random.state;
 
             storage.ChangePath(saveFilePath);
 
+            // 如果场景里存在关卡场景，那么激活它并不再加载其他关卡场景
             if(Application.isEditor)
             {
                 for (int i = 0; i < SceneManager.sceneCount; i++)
@@ -116,6 +123,7 @@ namespace Assets.Scripts.Tools.OpenScene.ObjectManagement.FabricatingShapes
                 }
             }
 
+            StartNewGame();
             StartCoroutine(LoadLevel(3));
         }
 
@@ -186,13 +194,19 @@ namespace Assets.Scripts.Tools.OpenScene.ObjectManagement.FabricatingShapes
                 factory.Reclaim(shapes[i]);
             }
             shapes.Clear();
+
+            Random.state = mainRandomState;
+            int seed = Random.Range(0, int.MaxValue ^ (int)Time.unscaledTime);
+            mainRandomState = Random.state;
+            Random.InitState(seed);
         }
 
         private void CreateShape(Transform parent, Shape prefab)
         {
             Shape instance = factory.GetRandom();
             //instance.transform.localPosition = Random.insideUnitSphere * instantiateDistance;
-            instance.transform.localPosition = SpawnZoneOfLevel.SpawnPoint;
+            //instance.transform.localPosition = SpawnZoneOfLevel.SpawnPoint;
+            instance.transform.localPosition = GameLevel.Current.SpawnPoint;
             instance.transform.localRotation = Random.rotation;
             instance.transform.localScale = Vector3.one * Random.Range(0.1f, 1.0f);
             instance.transform.SetParent(parent);
@@ -245,7 +259,11 @@ namespace Assets.Scripts.Tools.OpenScene.ObjectManagement.FabricatingShapes
             int count = reader.ReadInt();
             if (versionId >= 3)
             {
-                Random.state = reader.ReadRandomState();
+                Random.State state = reader.ReadRandomState();
+                if (!reseedOnLoad)
+                {
+                    Random.state = state;
+                }
             }
 
             StartCoroutine(LoadLevel(versionId < 2 ? 1 : reader.ReadInt()));
