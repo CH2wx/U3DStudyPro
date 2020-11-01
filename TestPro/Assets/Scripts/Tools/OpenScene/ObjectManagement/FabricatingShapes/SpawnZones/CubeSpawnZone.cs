@@ -19,6 +19,8 @@ namespace Assets.Scripts.Tools.OpenScene.ObjectManagement.FabricatingShapes.Spaw
                     int axis = Random.Range(0, 3);
                     p[axis] = p[axis] < 0 ? -0.5f : 0.5f;
                 }
+                p *= GameFabricatingShapes.Instance.instantiateDistance;
+                p += transform.position;
                 return p;
             }
         }

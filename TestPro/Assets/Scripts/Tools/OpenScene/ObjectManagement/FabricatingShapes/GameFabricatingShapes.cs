@@ -38,12 +38,16 @@ namespace Assets.Scripts.Tools.OpenScene.ObjectManagement.FabricatingShapes
         private float createLastTime = 0;
         [SerializeField]
         private Text createText;
+        [SerializeField]
+        private Slider creationSlider;
 
         [SerializeField, Range(0, 1)]
         private float destroyBetweenTime = 0.5f;
         private float destroyLastTime = 0;
         [SerializeField]
         private Text destoryText;
+        [SerializeField]
+        private Slider destroySlider;
 
         private string saveFilePath = "\\FabricatingShapes\\SaveFile";
         public PersistentStorage storage;
@@ -70,6 +74,7 @@ namespace Assets.Scripts.Tools.OpenScene.ObjectManagement.FabricatingShapes
             set
             {
                 isStartCreate = value > 0;
+                creationSlider.value = value;
                 createText.text = value.ToString();
             }
         }
@@ -83,6 +88,7 @@ namespace Assets.Scripts.Tools.OpenScene.ObjectManagement.FabricatingShapes
             set
             {
                 isStartDestroy = value > 0;
+                destroySlider.value = value;
                 destoryText.text = value.ToString();
             }
         }
@@ -126,9 +132,8 @@ namespace Assets.Scripts.Tools.OpenScene.ObjectManagement.FabricatingShapes
             StartNewGame();
             StartCoroutine(LoadLevel(3));
         }
-
-        // Update is called once per frame
-        void Update()
+        
+        private void FixedUpdate()
         {
             if (objectsParent.activeSelf != isShowCreateObjects)
             {
@@ -141,6 +146,7 @@ namespace Assets.Scripts.Tools.OpenScene.ObjectManagement.FabricatingShapes
             else if (Input.GetKeyDown(newGameKey))
             {
                 StartNewGame();
+                StartCoroutine(LoadLevel(loadedLevelBuildIndex));
             }
             else if (Input.GetKeyDown(saveKey))
             {
@@ -199,6 +205,9 @@ namespace Assets.Scripts.Tools.OpenScene.ObjectManagement.FabricatingShapes
             int seed = Random.Range(0, int.MaxValue ^ (int)Time.unscaledTime);
             mainRandomState = Random.state;
             Random.InitState(seed);
+
+            CreationSpeed = 0;
+            DestructionSpeed = 0;
         }
 
         private void CreateShape(Transform parent, Shape prefab)
@@ -238,8 +247,11 @@ namespace Assets.Scripts.Tools.OpenScene.ObjectManagement.FabricatingShapes
             writer.Write(shapes.Count);
             // Random.Range是一个伪随机数，所以如果在保存之后出现的物体位置一样，保存Random的伪随机序列即可
             writer.Write(Random.state);
+            writer.Write(CreationSpeed);
+            writer.Write(DestructionSpeed);
             // 储存最后一次加载的Level关卡
             writer.Write(loadedLevelBuildIndex);
+            GameLevel.Current.Save(writer);
             for (int i = 0; i < shapes.Count; i++)
             {
                 shapes[i].Save(writer);
@@ -256,6 +268,12 @@ namespace Assets.Scripts.Tools.OpenScene.ObjectManagement.FabricatingShapes
                 return;
             }
 
+            StartCoroutine(LoadGame(reader));
+        }
+
+        private IEnumerator LoadGame(GameDataReader reader)
+        {
+            int versionId = reader.Version;
             int count = reader.ReadInt();
             if (versionId >= 3)
             {
@@ -264,9 +282,11 @@ namespace Assets.Scripts.Tools.OpenScene.ObjectManagement.FabricatingShapes
                 {
                     Random.state = state;
                 }
+                CreationSpeed = reader.ReadFloat();
+                DestructionSpeed = reader.ReadFloat();
             }
 
-            StartCoroutine(LoadLevel(versionId < 2 ? 1 : reader.ReadInt()));
+            yield return LoadLevel(versionId < 2 ? 1 : reader.ReadInt());
             for (int i = 0; i < count; i++)
             {
                 int shapeId = reader.ReadInt();

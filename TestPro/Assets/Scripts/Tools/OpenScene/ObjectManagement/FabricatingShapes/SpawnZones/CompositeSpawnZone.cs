@@ -7,15 +7,26 @@ namespace Assets.Scripts.Tools.OpenScene.ObjectManagement.FabricatingShapes.Spaw
         [SerializeField]
         private SpawnZone[] spawnZones;
 
+        [SerializeField]
+        private SpawnZoneType spawnZoneType = SpawnZoneType.Sequential;
+        private int nextSpawnZoneIndex = 0;
+
         public override Vector3 SpawnPoint
         {
             get
             {
-                int index = Random.Range(0, spawnZones.Length);
-                Vector3 p = spawnZones[index].SpawnPoint;
-                p *= GameFabricatingShapes.Instance.instantiateDistance;
-                p += spawnZones[index].transform.position;
-                return p;
+                int index = 0;
+                switch (spawnZoneType)
+                {
+                    case SpawnZoneType.Random:
+                        index = Random.Range(0, spawnZones.Length);
+                        break;
+                    case SpawnZoneType.Sequential:
+                        index = nextSpawnZoneIndex;
+                        nextSpawnZoneIndex = (nextSpawnZoneIndex + 1) % spawnZones.Length;
+                        break;
+                }
+                return spawnZones[index].SpawnPoint;
             }
         }
     }

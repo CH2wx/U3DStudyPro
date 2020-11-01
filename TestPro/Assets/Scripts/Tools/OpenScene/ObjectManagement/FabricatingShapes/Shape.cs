@@ -20,6 +20,11 @@ namespace Assets.Scripts.Tools.OpenScene.ObjectManagement.FabricatingShapes
             meshRenderer = GetComponent<MeshRenderer>();
         }
 
+        private void FixedUpdate()
+        {
+            transform.Rotate(Vector3.forward);
+        }
+
         public int ShapeId
         {
             get

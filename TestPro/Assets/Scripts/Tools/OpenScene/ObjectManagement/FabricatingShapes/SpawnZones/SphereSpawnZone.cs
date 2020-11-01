@@ -11,7 +11,10 @@ namespace Assets.Scripts.Tools.OpenScene.ObjectManagement.FabricatingShapes.Spaw
         {
             get
             {
-                return surfaceOnly ? Random.onUnitSphere : Random.insideUnitSphere;
+                Vector3 p = surfaceOnly ? Random.onUnitSphere : Random.insideUnitSphere;
+                p *= GameFabricatingShapes.Instance.instantiateDistance;
+                p += transform.position;
+                return p;
             }
         }
 
