@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using Assets.Scripts.Tools.OpenScene.ObjectManagement.PersistentObjects;
+using UnityEngine;
 
 namespace Assets.Scripts.Tools.OpenScene.ObjectManagement.FabricatingShapes.SpawnZones
 {
@@ -28,6 +29,16 @@ namespace Assets.Scripts.Tools.OpenScene.ObjectManagement.FabricatingShapes.Spaw
                 }
                 return spawnZones[index].SpawnPoint;
             }
+        }
+
+        public override void Save(GameDataWriter writer)
+        {
+            writer.Write(nextSpawnZoneIndex);
+        }
+
+        public override void Load(GameDataReader reader)
+        {
+            nextSpawnZoneIndex = reader.ReadInt();
         }
     }
 }

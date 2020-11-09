@@ -233,7 +233,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   spawnZone: {fileID: 146352482}
   persistableObjects:
-  - {fileID: 498734181}
+  - {fileID: 146352482}
   - {fileID: 1823651357}
   - {fileID: 1835912355}
 --- !u!4 &498734182
@@ -515,11 +515,11 @@ MonoBehaviour:
   m_GameObject: {fileID: 1823651355}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 51ea5d770ad3eab4a954be48b6f63b07, type: 3}
+  m_Script: {fileID: 11500000, guid: df71275ff973a7a40871258581bd8091, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  angularVelocity: {x: 0, y: 90, z: 0}
-  rotateSpeed: 1
+  angularVelocity: {x: 0, y: 60, z: 0}
+  rotateSpeed: 2
 --- !u!1 &1835912353
 GameObject:
   m_ObjectHideFlags: 0
@@ -558,10 +558,10 @@ MonoBehaviour:
   m_GameObject: {fileID: 1835912353}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 51ea5d770ad3eab4a954be48b6f63b07, type: 3}
+  m_Script: {fileID: 11500000, guid: df71275ff973a7a40871258581bd8091, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  angularVelocity: {x: 90, y: 0, z: 0}
+  angularVelocity: {x: 60, y: 0, z: 0}
   rotateSpeed: 1
 --- !u!1 &2032297299
 GameObject:

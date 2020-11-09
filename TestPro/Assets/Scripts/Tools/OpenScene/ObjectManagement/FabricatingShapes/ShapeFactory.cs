@@ -109,6 +109,7 @@ namespace Assets.Scripts.Tools.OpenScene.ObjectManagement.FabricatingShapes
             Shape instance = null;
             if (recycle)
             {
+                Debug.Log(shapeId);
                 List<Shape> pool = Pools[shapeId];
                 if (pool.Count > 0)
                 {
