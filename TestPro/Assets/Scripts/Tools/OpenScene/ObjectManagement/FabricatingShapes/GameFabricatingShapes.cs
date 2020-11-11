@@ -61,7 +61,7 @@ namespace Assets.Scripts.Tools.OpenScene.ObjectManagement.FabricatingShapes
 
         private int loadedLevelBuildIndex = -1;
 
-        private const int saveVersionId = 3;
+        private const int saveVersionId = 4;
 
         public static GameFabricatingShapes Instance { get; private set; }
 
@@ -191,6 +191,11 @@ namespace Assets.Scripts.Tools.OpenScene.ObjectManagement.FabricatingShapes
                     DestroyShape();
                 }
             }
+
+            for (int i = 0; i < shapes.Count; i++)
+            {
+                shapes[i].GameUpdate();
+            }
         }
 
         private void StartNewGame()
@@ -219,6 +224,7 @@ namespace Assets.Scripts.Tools.OpenScene.ObjectManagement.FabricatingShapes
             instance.transform.localRotation = Random.rotation;
             instance.transform.localScale = Vector3.one * Random.Range(0.1f, 1.0f);
             instance.transform.SetParent(parent);
+            instance.AngularVelocity = Random.onUnitSphere * Random.Range(0f, 90f);
 
             // hue 色调：0-360°；saturation 饱和度：0-100%； value 亮度：0-100%； alpha 透明度：0-100%
             instance.SetColor(Random.ColorHSV(
@@ -287,6 +293,7 @@ namespace Assets.Scripts.Tools.OpenScene.ObjectManagement.FabricatingShapes
             }
 
             yield return LoadLevel(versionId < 2 ? 1 : reader.ReadInt());
+            GameLevel.Current.Load(reader);
             for (int i = 0; i < count; i++)
             {
                 int shapeId = reader.ReadInt();

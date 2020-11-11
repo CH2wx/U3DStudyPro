@@ -15,14 +15,16 @@ namespace Assets.Scripts.Tools.OpenScene.ObjectManagement.FabricatingShapes
         private MeshRenderer meshRenderer;
         private Color color;
 
+        public Vector3 AngularVelocity { get; set; }
+
         void Awake()
         {
             meshRenderer = GetComponent<MeshRenderer>();
         }
 
-        private void FixedUpdate()
+        public void GameUpdate()
         {
-            transform.Rotate(Vector3.forward);
+            transform.Rotate(AngularVelocity * Time.deltaTime);
         }
 
         public int ShapeId
@@ -71,12 +73,14 @@ namespace Assets.Scripts.Tools.OpenScene.ObjectManagement.FabricatingShapes
             writer.Write(MaterialId);
             base.Save(writer);
             writer.Write(color);
+            writer.Write(AngularVelocity);
         }
 
         public override void Load (GameDataReader reader)
         {
             base.Load(reader);
             SetColor(reader.Version > 0 ? reader.ReadColor() : Color.white);
+            AngularVelocity = reader.Version >= 4 ? reader.ReadVector3() : Vector3.zero;
         }
 
         public void SetMaterial(Material material, int materialId)
