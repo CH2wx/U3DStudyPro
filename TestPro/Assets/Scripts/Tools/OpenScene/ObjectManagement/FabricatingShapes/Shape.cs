@@ -15,6 +15,7 @@ namespace Assets.Scripts.Tools.OpenScene.ObjectManagement.FabricatingShapes
         private MeshRenderer meshRenderer;
         private Color color;
 
+        public Vector3 Velocity { get; set; }
         public Vector3 AngularVelocity { get; set; }
 
         void Awake()
@@ -25,6 +26,7 @@ namespace Assets.Scripts.Tools.OpenScene.ObjectManagement.FabricatingShapes
         public void GameUpdate()
         {
             transform.Rotate(AngularVelocity * Time.deltaTime);
+            transform.localPosition += Velocity * Time.deltaTime;
         }
 
         public int ShapeId
@@ -74,6 +76,7 @@ namespace Assets.Scripts.Tools.OpenScene.ObjectManagement.FabricatingShapes
             base.Save(writer);
             writer.Write(color);
             writer.Write(AngularVelocity);
+            writer.Write(Velocity);
         }
 
         public override void Load (GameDataReader reader)
@@ -81,6 +84,7 @@ namespace Assets.Scripts.Tools.OpenScene.ObjectManagement.FabricatingShapes
             base.Load(reader);
             SetColor(reader.Version > 0 ? reader.ReadColor() : Color.white);
             AngularVelocity = reader.Version >= 4 ? reader.ReadVector3() : Vector3.zero;
+            Velocity = reader.Version >= 4 ? reader.ReadVector3() : Vector3.zero;
         }
 
         public void SetMaterial(Material material, int materialId)
