@@ -22,12 +22,14 @@ namespace Assets.Scripts.Tools.OpenScene.ObjectManagement.FabricatingShapes.Spaw
             }
         }
 
-        public Vector3 SpawnPoint
+        //public void ConfigureSpawn(Shape shape)
+        //{
+        //    spawnZone.ConfigureSpawn(shape);
+        //}
+
+        public Shape SpawnShape()
         {
-            get
-            {
-                return spawnZone.SpawnPoint;
-            }
+            return spawnZone.SpawnShape();
         }
 
         private void Start()

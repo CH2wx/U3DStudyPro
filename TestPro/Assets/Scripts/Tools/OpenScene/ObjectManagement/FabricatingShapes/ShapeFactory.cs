@@ -20,6 +20,27 @@ namespace Assets.Scripts.Tools.OpenScene.ObjectManagement.FabricatingShapes
         private Scene poolScene;
         private GameObject shapesParent;
 
+        [System.NonSerialized]
+        private int facotryId = int.MinValue;
+        public int FacotryId
+        {
+            get
+            {
+                return facotryId;
+            }
+            set
+            {
+                if (facotryId == int.MinValue && value != int.MinValue)
+                {
+                    facotryId = value;
+                }
+                else
+                {
+                    Debug.LogError("Not allowed to change factoryId.");
+                }
+            }
+        }
+
         public List<Shape>[] Pools
         {
             get
@@ -93,6 +114,11 @@ namespace Assets.Scripts.Tools.OpenScene.ObjectManagement.FabricatingShapes
         /// <param name="shapeToRecycle"></param>
         public void Reclaim(Shape shapeToRecycle)
         {
+            if (shapeToRecycle.OriginalFactory != this)
+            {
+                Debug.LogError("Tried to reclaim shape with wrong factory.");
+                return;
+            }
             if (recycle)
             {
                 shapeToRecycle.gameObject.SetActive(false);
@@ -121,6 +147,7 @@ namespace Assets.Scripts.Tools.OpenScene.ObjectManagement.FabricatingShapes
             if (instance == null)
             {
                 instance = Instantiate(prefabs[shapeId]);
+                instance.OriginalFactory = this;
                 instance.ShapeId = shapeId;
                 instance.SetMaterial(materials[materialId], materialId);
             }

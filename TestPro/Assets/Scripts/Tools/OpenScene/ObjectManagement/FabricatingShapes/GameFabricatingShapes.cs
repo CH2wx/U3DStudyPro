@@ -12,7 +12,7 @@ namespace Assets.Scripts.Tools.OpenScene.ObjectManagement.FabricatingShapes
     {
         [SerializeField]
         private Shape prefab;
-        private GameObject objectsParent;
+        //private GameObject objectsParent;
         public float instantiateDistance = 15f;
 
         [SerializeField, Header("是否显示生成的对象")]
@@ -52,7 +52,8 @@ namespace Assets.Scripts.Tools.OpenScene.ObjectManagement.FabricatingShapes
         private string saveFilePath = "\\FabricatingShapes\\SaveFile";
         public PersistentStorage storage;
         private List<Shape> shapes;
-        public ShapeFactory factory;
+        //public ShapeFactory factory;
+        public ShapeFactory[] factories;
         //public SpawnZone SpawnZoneOfLevel { set; get; }
 
         [SerializeField]
@@ -61,7 +62,7 @@ namespace Assets.Scripts.Tools.OpenScene.ObjectManagement.FabricatingShapes
 
         private int loadedLevelBuildIndex = -1;
 
-        private const int saveVersionId = 4;
+        private const int saveVersionId = 5;
 
         public static GameFabricatingShapes Instance { get; private set; }
 
@@ -99,6 +100,13 @@ namespace Assets.Scripts.Tools.OpenScene.ObjectManagement.FabricatingShapes
         private void OnEnable()
         {
             Instance = this;
+            if (factories[0].FacotryId != 0)
+            {
+                for (int i = 0; i < factories.Length; i++)
+                {
+                    factories[i].FacotryId = i;
+                }
+            }
         }
 
         // Use this for initialization
@@ -109,7 +117,7 @@ namespace Assets.Scripts.Tools.OpenScene.ObjectManagement.FabricatingShapes
             shapes = new List<Shape>();
             CreationSpeed = CreationSpeed;
             DestructionSpeed = DestructionSpeed;
-            objectsParent = factory.ShapesParent;
+            //objectsParent = factory.ShapesParent;
             mainRandomState = Random.state;
 
             storage.ChangePath(saveFilePath);
@@ -135,13 +143,16 @@ namespace Assets.Scripts.Tools.OpenScene.ObjectManagement.FabricatingShapes
         
         private void FixedUpdate()
         {
-            if (objectsParent.activeSelf != isShowCreateObjects)
+            if (factories[0].ShapesParent.activeSelf != isShowCreateObjects)
             {
-                objectsParent.SetActive(isShowCreateObjects);
+                for (int i = 0; i < factories.Length; i++)
+                {
+                    factories[i].ShapesParent.SetActive(isShowCreateObjects);
+                }
             }
             else if (Input.GetKeyDown(createKey))
             {
-                CreateShape(objectsParent.transform, prefab);
+                CreateShape(prefab);
             }
             else if (Input.GetKeyDown(newGameKey))
             {
@@ -179,7 +190,7 @@ namespace Assets.Scripts.Tools.OpenScene.ObjectManagement.FabricatingShapes
                 while (createLastTime > createBetweenTime)
                 {
                     createLastTime -= createBetweenTime;
-                    CreateShape(objectsParent.transform, prefab);
+                    CreateShape(prefab);
                 }
             }
             if (isStartDestroy)
@@ -202,7 +213,8 @@ namespace Assets.Scripts.Tools.OpenScene.ObjectManagement.FabricatingShapes
         {
             for (int i = 0; i < shapes.Count; i++)
             {
-                factory.Reclaim(shapes[i]);
+                //factory.Reclaim(shapes[i]);
+                shapes[i].Reclaim();
             }
             shapes.Clear();
 
@@ -215,24 +227,12 @@ namespace Assets.Scripts.Tools.OpenScene.ObjectManagement.FabricatingShapes
             DestructionSpeed = 0;
         }
 
-        private void CreateShape(Transform parent, Shape prefab)
+        private void CreateShape(Shape prefab)
         {
-            Shape instance = factory.GetRandom();
-            //instance.transform.localPosition = Random.insideUnitSphere * instantiateDistance;
-            //instance.transform.localPosition = SpawnZoneOfLevel.SpawnPoint;
-            instance.transform.localPosition = GameLevel.Current.SpawnPoint;
-            instance.transform.localRotation = Random.rotation;
-            instance.transform.localScale = Vector3.one * Random.Range(0.1f, 1.0f);
-            instance.transform.SetParent(parent);
-            instance.AngularVelocity = Random.onUnitSphere * Random.Range(0f, 90f);
-
-            // hue 色调：0-360°；saturation 饱和度：0-100%； value 亮度：0-100%； alpha 透明度：0-100%
-            instance.SetColor(Random.ColorHSV(
-                                        hueMin: 0f, hueMax: 1f,
-                                        saturationMin: 0.5f, saturationMax: 1f,
-                                        valueMin: 0.25f, valueMax: 1f,
-                                        alphaMin: 1f, alphaMax: 1f));
-
+            //Shape instance = factory.GetRandom();
+            //GameLevel.Current.ConfigureSpawn(instance);
+            Shape instance = GameLevel.Current.SpawnShape();
+            instance.transform.SetParent(factories[instance.OriginalFactory.FacotryId].ShapesParent.transform);
             shapes.Add(instance);
         }
 
@@ -241,7 +241,8 @@ namespace Assets.Scripts.Tools.OpenScene.ObjectManagement.FabricatingShapes
             if (shapes.Count > 0)
             {
                 int index = Random.Range(0, shapes.Count);
-                factory.Reclaim(shapes[index]);
+                //factory.Reclaim(shapes[index]);
+                shapes[index].Reclaim();
                 int lastIndex = shapes.Count - 1;
                 shapes[index] = shapes[lastIndex];
                 shapes.RemoveAt(lastIndex);
@@ -260,6 +261,9 @@ namespace Assets.Scripts.Tools.OpenScene.ObjectManagement.FabricatingShapes
             GameLevel.Current.Save(writer);
             for (int i = 0; i < shapes.Count; i++)
             {
+                writer.Write(shapes[i].OriginalFactory.FacotryId);
+                writer.Write(shapes[i].ShapeId);
+                writer.Write(shapes[i].MaterialId);
                 shapes[i].Save(writer);
             }
         }
@@ -296,10 +300,11 @@ namespace Assets.Scripts.Tools.OpenScene.ObjectManagement.FabricatingShapes
             GameLevel.Current.Load(reader);
             for (int i = 0; i < count; i++)
             {
+                int originalFacotryId = reader.ReadInt();
                 int shapeId = reader.ReadInt();
                 int materialId = reader.ReadInt();
-                Shape instance = factory.Get(shapeId, materialId);
-                instance.transform.SetParent(objectsParent.transform);
+                Shape instance = factories[originalFacotryId].Get(shapeId, materialId);
+                instance.transform.SetParent(factories[originalFacotryId].ShapesParent.transform);
                 instance.name = i.ToString();
                 instance.Load(reader);
                 shapes.Add(instance);
