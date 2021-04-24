@@ -63,6 +63,7 @@ namespace Assets.Scripts.Tools.OpenScene.ObjectManagement.FabricatingShapes
         private int loadedLevelBuildIndex = -1;
 
         private const int saveVersionId = 5;
+        private const int loadLevelId = 4;              // 没有场景时，加载场景多少
 
         public static GameFabricatingShapes Instance { get; private set; }
 
@@ -138,7 +139,7 @@ namespace Assets.Scripts.Tools.OpenScene.ObjectManagement.FabricatingShapes
             }
 
             StartNewGame();
-            StartCoroutine(LoadLevel(3));
+            StartCoroutine(LoadLevel(loadLevelId));
         }
         
         private void FixedUpdate()
@@ -150,21 +151,25 @@ namespace Assets.Scripts.Tools.OpenScene.ObjectManagement.FabricatingShapes
                     factories[i].ShapesParent.SetActive(isShowCreateObjects);
                 }
             }
-            else if (Input.GetKeyDown(createKey))
+            if (Input.GetKeyDown(createKey))
             {
+                print("Create Shape");
                 CreateShape(prefab);
             }
             else if (Input.GetKeyDown(newGameKey))
             {
+                print("New Game");
                 StartNewGame();
                 StartCoroutine(LoadLevel(loadedLevelBuildIndex));
             }
             else if (Input.GetKeyDown(saveKey))
             {
+                print("Save Game");
                 storage.Save(this, saveVersionId);
             }
             else if (Input.GetKeyDown(loadKey))
             {
+                print("Load Game");
                 StartNewGame();
                 storage.Load(this);
             }
