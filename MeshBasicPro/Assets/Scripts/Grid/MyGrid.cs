@@ -82,11 +82,8 @@ public class MyGrid : MonoBehaviour
         }
         for (int i = 0; i < vertices.Length; i++)
         {
-            if (vertices[i] != null)
-            {
-                Gizmos.color = Color.blue;//为随后绘制的gizmos设置颜色。
-                Gizmos.DrawSphere(vertices[i], 0.1f);//使用center和radius参数，绘制一个线框球体。
-            }
+            Gizmos.color = Color.blue;//为随后绘制的gizmos设置颜色。
+            Gizmos.DrawSphere(vertices[i], 0.1f);//使用center和radius参数，绘制一个线框球体。
         }
     }
 }
