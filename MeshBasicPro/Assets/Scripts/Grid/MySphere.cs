@@ -9,11 +9,14 @@ using UnityEngine;
 [RequireComponent(typeof(MeshFilter), typeof(MeshRenderer))]
 public class MySphere : MonoBehaviour
 {
+    /// <summary>
+    /// 网格大小，用于顶点的数量，网格越大，顶点越多，弧度越柔和。与球的大小无关
+    /// </summary>
     public int gridSize;
     /// <summary>
-    /// 圆角的程度
+    /// 球的半径，控制球的大小
     /// </summary>
-    private int roundness;
+    public float radius;
 
     public bool isKinematic = true;
 
@@ -29,10 +32,8 @@ public class MySphere : MonoBehaviour
 
     private void Generate()
     {
-        roundness = gridSize / 2;
-
         _mesh = new Mesh();
-        _mesh.name = "Procedural Sphere";
+        _mesh.name = "Procedural Cube";
         GetComponent<MeshFilter>().mesh = _mesh;
 
         CreateVertices();
@@ -48,8 +49,12 @@ public class MySphere : MonoBehaviour
     private void CreateVertices()
     {
         int cornerVertices = 8;
-        int edgeVertices = (gridSize - 1) * 12;
-        int faceVertices = (gridSize - 1) * (gridSize - 1) * 6;
+        int edgeVertices = (gridSize + gridSize + gridSize - 3) * 4;
+        int faceVertices = (
+                (gridSize - 1) * (gridSize - 1) +
+                (gridSize - 1) * (gridSize - 1) +
+                (gridSize - 1) * (gridSize - 1)
+            ) * 2;
         _vertices = new Vector3[cornerVertices + edgeVertices + faceVertices];
         _normals = new Vector3[_vertices.Length];
         _cubeUV = new Color32[_vertices.Length];
@@ -99,38 +104,18 @@ public class MySphere : MonoBehaviour
 
     private void SetVertex(int i, int x, int y, int z)
     {
-        Vector3 inner = new Vector3(x, y, z);
-        _vertices[i] = inner;
+        Vector3 v = new Vector3(x, y, z) * 2f / gridSize - Vector3.one;     // 另球的半径保持在[-1, 1]
+        // 对v的正方体上的顶点进行映射，映射到球的表面上
+        float x2 = v.x * v.x;
+        float y2 = v.y * v.y;
+        float z2 = v.z * v.z;
+        Vector3 sphereNormal;
+        sphereNormal.x = v.x * Mathf.Sqrt(1f - y2 / 2f - z2 / 2f + y2 * z2 / 3f);
+        sphereNormal.y = v.y * Mathf.Sqrt(1f - x2 / 2f - z2 / 2f + x2 * z2 / 3f);
+        sphereNormal.z = v.z * Mathf.Sqrt(1f - x2 / 2f - y2 / 2f + x2 * y2 / 3f);
 
-        if (inner.x < roundness)
-        {
-            inner.x = roundness;
-        }
-        else if (inner.x > gridSize - roundness)
-        {
-            inner.x = gridSize - roundness;
-        }
-
-        if (inner.y < roundness)
-        {
-            inner.y = roundness;
-        }
-        else if (inner.y > gridSize - roundness)
-        {
-            inner.y = gridSize - roundness;
-        }
-
-        if (inner.z < roundness)
-        {
-            inner.z = roundness;
-        }
-        else if (inner.z > gridSize - roundness)
-        {
-            inner.z = gridSize - roundness;
-        }
-
-        _normals[i] = (_vertices[i] - inner).normalized;
-        _vertices[i] = inner + _normals[i] * roundness;
+        _normals[i] = sphereNormal;
+        _vertices[i] = _normals[i] * radius;
         _cubeUV[i] = new Color32((byte)x, (byte)y, (byte)z, 0);
     }
 
@@ -281,20 +266,20 @@ public class MySphere : MonoBehaviour
         gameObject.AddComponent<SphereCollider>();
     }
 
-    private void OnDrawGizmos()
-    {
-        if (_vertices == null || _vertices.Length <= 0)
-        {
-            return;
-        }
-        for (int i = 0; i < _vertices.Length; i++)
-        {
-            // 画顶点
-            Gizmos.color = Color.cyan;
-            Gizmos.DrawSphere(_vertices[i], 0.1f);
-            // 画法线
-            Gizmos.color = Color.yellow;
-            Gizmos.DrawRay(_vertices[i], _normals[i]);
-        }
-    }
+    //private void OnDrawGizmos()
+    //{
+    //    if (_vertices == null || _vertices.Length <= 0)
+    //    {
+    //        return;
+    //    }
+    //    for (int i = 0; i < _vertices.Length; i++)
+    //    {
+    //        // 画顶点
+    //        Gizmos.color = Color.cyan;
+    //        Gizmos.DrawSphere(_vertices[i], 0.1f);
+    //        // 画法线
+    //        Gizmos.color = Color.yellow;
+    //        Gizmos.DrawRay(_vertices[i], _normals[i]);
+    //    }
+    //}
 }
