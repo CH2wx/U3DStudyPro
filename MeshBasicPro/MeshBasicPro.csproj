@@ -233,6 +233,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Assets\Scripts\CustomComponent\DrawGizmos\CircleGizmo.cs" />
+    <Compile Include="Assets\Scripts\Grid\MeshDeformer\MeshDeformer.cs" />
+    <Compile Include="Assets\Scripts\Grid\MeshDeformer\MeshDeformerInput.cs" />
     <Compile Include="Assets\Scripts\Grid\MyCube.cs" />
     <Compile Include="Assets\Scripts\Grid\MyGrid.cs" />
     <Compile Include="Assets\Scripts\Grid\MySphere.cs" />
