@@ -83,7 +83,6 @@
                 o.vertex = UnityObjectToClipPos(i.vertex);
                 o.uv = i.uv;
 
-
                 o.color = i.color * _Color;
                 return o;
             }

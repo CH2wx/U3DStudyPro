@@ -59,9 +59,11 @@
      <Compile Include="Assets\Scripts\Renderer01\TransformationGrid.cs" />
      <None Include="Assets\Resources\ImageMask\ImageMask.shader" />
      <None Include="Assets\Scripts\Renderer03\TexturedWithDetail.shader" />
-     <None Include="Assets\Scripts\Renderer02\MyFirstShader.shader" />
      <None Include="Assets\Scripts\Renderer03\UI-Default 1.shader" />
+     <None Include="Assets\Scripts\Renderer02\MyFirstShader.shader" />
+     <None Include="Assets\Resources\ImageMask\UIMask.shader" />
      <None Include="Assets\Resources\Renderer02\note.txt" />
+     <None Include="Assets\Scripts\Renderer03\TextureSplatting.shader" />
      <None Include="Assets\Note.txt" />
  <Reference Include="UnityEngine.CoreModule">
  <HintPath>E:/WorkSoft/Unity2017/Unity/Editor/Data/Managed/UnityEngine/UnityEngine.CoreModule.dll</HintPath>
